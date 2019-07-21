@@ -1,4 +1,5 @@
 *-checkpoint.ipynb
+*.m~
 .gitignore
 
 !.gitignore
