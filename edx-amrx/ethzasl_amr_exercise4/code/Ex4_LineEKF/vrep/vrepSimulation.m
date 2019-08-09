@@ -47,7 +47,7 @@ v = [0;0];
 
 bob_setWheelSpeeds(connection, 0.9, 1.0);
 
-for i = 1:300
+for i = 1:1000
     
     for l = 1:round(laserRate/simStep)
         simulation_triggerStep(connection);

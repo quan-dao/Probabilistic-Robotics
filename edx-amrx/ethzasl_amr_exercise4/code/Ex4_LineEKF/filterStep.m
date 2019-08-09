@@ -19,6 +19,14 @@ P_hat = F_x * P * F_x' + F_u * Q * F_u';
 % Matching observation against prediction measurement
 [v, H, R] = associateMeasurements(x_hat, P_hat, Z, R, M, g);
 
+% check if matching is successfull
+if isempty(H)
+    % no map entries match with observation -> no update is carried out
+    x_posteriori = x;
+    P_posteriori = P;
+    return;
+end
+
 % Estimation
 K = size(H, 3);  % number of matched observation
 
