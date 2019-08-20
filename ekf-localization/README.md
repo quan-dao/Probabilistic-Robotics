@@ -1,6 +1,8 @@
 [//]: # (Image References)
 [bob_env]: ./images/bob_env.png
 [line_fitting]: ./images/line_fitting.png
+[ekf_local]: ./images/EKF_localization.gif
+[just_odometry]: ./images/just_odometry.gif
 
 # 1. Intro
 The EKF Localization algorithm is implemented for a differential drive robot equipped with a ring of rangefinders, operated in the environment shown in Fig.1. It's worth to notice that the sensory output is a set of 2D points on the plane defined by the rangefinders ring.
@@ -18,7 +20,10 @@ From the raw sensory output (a set of 2D points), several lines are extracted fo
 
 <img src="https://tex.s2cms.ru/svg/M%20%3D%20%5Cbegin%7BBmatrix%7Dm_0%2C%20m_1%2C%20%5Cdots%2C%20m_%7Bn%20-1%7D%5Cend%7BBmatrix%7D" alt="M = \begin{Bmatrix}m_0, m_1, \dots, m_{n -1}\end{Bmatrix}" />
 
-The EKF Localization algorithm is comprised of 3 steps: Motion Prediction, Measurement Prediction, Correction.
+The EKF Localization algorithm is comprised of 3 steps: 
+1. Motion Prediction 
+2. Measurement Prediction
+3. Estimation
 
 # 2. Motion Prediction
 Given the current pose of robot <img src="https://tex.s2cms.ru/svg/%5Ctextbf%7Bx%7D_%7Bt%20-%201%7D" alt="\textbf{x}_{t - 1}" /> and the control input <img src="https://tex.s2cms.ru/svg/u_t" alt="u_t" />, new robot pose <img src="https://tex.s2cms.ru/svg/%5Ctextbf%7Bx%7D_t" alt="\textbf{x}_t" /> can be predicted by the motion model. In this example, the <img src="https://tex.s2cms.ru/svg/u_t" alt="u_t" /> is robot odometry - displacement of left and right wheel.
@@ -78,7 +83,7 @@ r^j - \left(\hat{x}_t \cdot \cos(\alpha^j) + \hat{y}_t \cdot \sin(\alpha^j)\righ
 \end{bmatrix}" />
 
 For later usage, the Jacobian of the measurement model above is dervied
-<img src="https://tex.s2cms.ru/svg/H_%7B%5Ctextbf%7Bx%7D%7D%20%3D%20%5Cbegin%7Bbmatrix%7D%0A0%20%26%200%20%26%20-1%20%5C%5C%0A-%5Ccos%5Cleft(%5Calpha%5Ej%5Cright)%20%26%20-%5Csin%5Cleft(%5Calpha%5Ej%5Cright)%20%26%200%0A%5Cend%7Bbmatrix%7D" alt="H_{\textbf{x}} = \begin{bmatrix}
+<img src="https://tex.s2cms.ru/svg/H_%7B%5Ctextbf%7Bx%7D%7D%20%3D%20%5Cbegin%7Bbmatrix%7D%0A0%20%26%200%20%26%20-1%20%5C%5C%0A-%5Ccos%5Cleft(%5Calpha%5Ej%5Cright)%20%26%20-%5Csin%5Cleft(%5Calpha%5Ej%5Cright)%20%26%200%0A%5Cend%7Bbmatrix%7D" alt="H_{\textbf{x}}^j = \begin{bmatrix}
 0 &amp; 0 &amp; -1 \\
 -\cos\left(\alpha^j\right) &amp; -\sin\left(\alpha^j\right) &amp; 0
 \end{bmatrix}" />
@@ -87,12 +92,47 @@ For later usage, the Jacobian of the measurement model above is dervied
 At this point, robot have obtained 2 sets of measurement: the actual measurement <img src="https://tex.s2cms.ru/svg/%5Ctextbf%7BZ%7D_t%20%3D%20%5Cleft%5C%7Bz_t%5Ei%20%7C%20i%20%3D%200%2C%20%5Cdots%2C%20m-1%5Cright%5C%7D" alt="\textbf{Z}_t = \left\{z_t^i | i = 0, \dots, m-1\right\}" /> and the predicted measurement <img src="https://tex.s2cms.ru/svg/%5Chat%7B%5Ctextbf%7BZ%7D%7D_t%20%3D%20%5Cleft%5C%7B%5Chat%7Bz%7D%5Ej_t%20%7C%20j%20%3D%200%2C%20%5Cdots%2C%20n-1%5Cright%5C%7D" alt="\hat{\textbf{Z}}_t = \left\{\hat{z}^j_t | j = 0, \dots, n-1\right\}" />. For the Kalman Filter to operate, the correspondence between acutal and predicted measurement need to be established. To this end, the Mahalanobis distance between the acutal measurement <img src="https://tex.s2cms.ru/svg/z_t%5Ei" alt="z_t^i" /> and the predicted measurement <img src="https://tex.s2cms.ru/svg/%5Chat%7Bz%7D_t%5Ej" alt="\hat{z}_t^j" /> is employed. 
 
 To calculate the Mahalanobis distance, the innovation vector <img src="https://tex.s2cms.ru/svg/v_t%5E%7Bij%7D" alt="v_t^{ij}" /> is first computed
+
 <img src="https://tex.s2cms.ru/svg/v_t%5E%7Bij%7D%20%3D%20z_t%5Ei%20-%20%5Chat%7Bz%7D_t%5Ej" alt="v_t^{ij} = z_t^i - \hat{z}_t^j" />
 
 The covariant matrix of <img src="https://tex.s2cms.ru/svg/v_t%5E%7Bij%7D" alt="v_t^{ij}" /> is calculated by   
-<img src="https://tex.s2cms.ru/svg/%5CSigma_t%5E%7Bij%7D%20%3D%20R_t%5Ei%20%2B%20H_%7B%5Ctextbf%7Bx%7D%7D%20%5Ccdot%20%5Chat%7BP%7D_t%20%5Ccdot%20H_%7B%5Ctextbf%7Bx%7D%7D%5ET%20" alt="\Sigma_t^{ij} = R_t^i + H_{\textbf{x}} \cdot \hat{P}_t \cdot H_{\textbf{x}}^T " />
+
+<img src="https://tex.s2cms.ru/svg/%5CSigma_t%5E%7Bij%7D%20%3D%20R_t%5Ei%20%2B%20H_%7B%5Ctextbf%7Bx%7D%7D%20%5Ccdot%20%5Chat%7BP%7D_t%20%5Ccdot%20H_%7B%5Ctextbf%7Bx%7D%7D%5ET%20" alt="\Sigma_{IN_t}^{ij} = R_t^i + H_{\textbf{x}} \cdot \hat{P}_t \cdot H_{\textbf{x}}^T " />
+
+Here, <img src="https://tex.s2cms.ru/svg/R_t%5Ei" alt="R_t^i" /> is the covariant matrix of <img src="https://tex.s2cms.ru/svg/z_t%5Ei" alt="z_t^i" />. This matrix is inferred from the covariant associated with the noise of all 2D points that form <img src="https://tex.s2cms.ru/svg/z_t%5Ei" alt="z_t^i" />.
 
 The Mahalanobis distance <img src="https://tex.s2cms.ru/svg/d_t%5E%7Bij%7D" alt="d_t^{ij}" /> is 
-<img src="https://tex.s2cms.ru/svg/d_t%5E%7Bij%7D%20%3D%20v_t%5E%7Bij%7D%5ET%20%5Ccdot%20%5Cleft(%5CSigma_t%5E%7Bij%7D%5Cright)%5E%7B-1%7D%20%5Ccdot%20v_t%5E%7Bij%7D" alt="d_t^{ij} = v_t^{ij}^T \cdot \left(\Sigma_t^{ij}\right)^{-1} \cdot v_t^{ij}" />
+
+<img src="https://tex.s2cms.ru/svg/d_t%5E%7Bij%7D%20%3D%20v_t%5E%7Bij%7D%5ET%20%5Ccdot%20%5Cleft(%5CSigma_t%5E%7Bij%7D%5Cright)%5E%7B-1%7D%20%5Ccdot%20v_t%5E%7Bij%7D" alt="d_t^{ij} = v_t^{ij}^T \cdot \left(\Sigma_{IN_t}^{ij}\right)^{-1} \cdot v_t^{ij}" />
 
 If this distance is smaller than a threshold, a correspondence is found. In case there are more than 1 predicted feature match with one actual feature, the predicted feature with smallest distance is chosen.
+
+# 4. Estimation
+In this step, the matched measurements are used to correct the prediction of motion model <img src="https://tex.s2cms.ru/svg/%5Chat%7B%5Ctextbf%7Bx%7D%7D%7D_t%2C%20%5Chat%7BP%7D_t" alt="\hat{\textbf{x}}}_t, \hat{P}_t" />. 
+
+For all pairs of match actual and predicted measurement, vertically concatenate the actual measurements into vector <img src="https://tex.s2cms.ru/svg/z_t" alt="z_t" /> and the predicted measurements into <img src="https://tex.s2cms.ru/svg/%5Chat%7Bz%7D_t" alt="\hat{z}_t" />. The composite innovation vector <img src="https://tex.s2cms.ru/svg/v_t" alt="v_t" /> is
+
+<img src="https://tex.s2cms.ru/svg/v_t%20%3D%20z_t%20-%20%5Chat%7Bz%7D_t" alt="v_t = z_t - \hat{z}_t" />
+
+To calculate the covariant matrix of <img src="https://tex.s2cms.ru/svg/v_t" alt="v_t" /> - <img src="https://tex.s2cms.ru/svg/%5CSigma_%7BIN_t%7D" alt="\Sigma_{IN_t}" /> , vertically concatenate all <img src="https://tex.s2cms.ru/svg/H_%7B%5Ctextbf%7Bx%7D%7D%5Ej" alt="H_{\textbf{x}}^j" /> to make the composite Jacobian of measurement model <img src="https://tex.s2cms.ru/svg/H_t" alt="H_t" />; and put the covariant matrix of all actual measurement <img src="https://tex.s2cms.ru/svg/R_t%5Ei" alt="R_t^i" /> into a block diagonal matrix <img src="https://tex.s2cms.ru/svg/R_t" alt="R_t" />. Similarly to the covariant matrix of a single pair of match measurements, <img src="https://tex.s2cms.ru/svg/%5CSigma_%7BIN_t%7D" alt="\Sigma_{IN_t}" /> is calculated by 
+
+<img src="https://tex.s2cms.ru/svg/%5CSigma_%7BIN_t%7D%20%3D%20R_t%20%2B%20H_%7B%5Ctextbf%7Bx%7D%7D%5Ccdot%20%5Chat%7BP%7D_t%20%5Ccdot%20H_%7B%5Ctextbf%7Bx%7D%7D%5ET" alt="\Sigma_{IN_t} = R_t + H_{\textbf{x}}\cdot \hat{P}_t \cdot H_{\textbf{x}}^T" />
+
+Next, compute the Kalman gain
+
+<img src="https://tex.s2cms.ru/svg/%5Ctextbf%7BK%7D_t%20%3D%20%5Chat%7BP%7D_t%20%5Ccdot%20H_t%5ET%20%5Ccdot%20%5CSigma_%7BIN_t%7D" alt="\textbf{K}_t = \hat{P}_t \cdot H_t^T \cdot \Sigma_{IN_t}" />
+
+The new estimation of robot pose and its covariant matrix is 
+
+<img src="https://tex.s2cms.ru/svg/%20%5Ctextbf%7Bx%7D_t%20%3D%20%5Chat%7B%5Ctextbf%7Bx%7D%7D_t%20%2B%20%5Ctextbf%7BK%7D_t%20%5Ccdot%20v_t%20" alt=" \textbf{x}_t = \hat{\textbf{x}}_t + \textbf{K}_t \cdot v_t " />
+
+<img src="https://tex.s2cms.ru/svg/%20P_t%20%3D%20%5Cleft(I%20-%20%5Ctextbf%7BK%7D_t%20%5Ccdot%20H_t%20%5Cright)%20%5Ccdot%20%5Chat%7BP%7D_t%20" alt=" P_t = \left(I - \textbf{K}_t \cdot H_t \right) \cdot \hat{P}_t " />
+
+# 5. Result
+The comparison between EKF Localization and Odometry is shown below. In those figures, the grought truth and the estimated by either EKF or odometry is respectively denoted by the grey robot and the yellow robot. It can be seen that while the Odometry quickly diverse from the ground truth, EKF Localization still manages to track the true state.
+
+![alt text][just_odometry]
+Fig.3 Odometry result 
+
+![alt text][ekf_local]
+Fig.4 EKF Localization result
