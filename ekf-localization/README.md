@@ -5,6 +5,8 @@
 [just_odometry]: ./images/just_odometry.gif
 
 # 1. Intro
+This implementation of EKF Localization is forked from [Edx/AMRx-Exercise-4](https://www.edx.org/course/autonomous-mobile-robots-2)
+
 The EKF Localization algorithm is implemented for a differential drive robot equipped with a ring of rangefinders, operated in the environment shown in Fig.1. It's worth to notice that the sensory output is a set of 2D points on the plane defined by the rangefinders ring.
 
 ![alt text][bob_env]
@@ -73,6 +75,7 @@ As mentioned in Sec.1, robot has a ring of rangefinders; therefore the raw measu
 The definition of these numbers is shown in Fig.2.  
 
 ![alt text][line_fitting]
+
 Fig.2 Parameterize a line  
 
 The measurement model is to predict the obtained measurment given robot position and the environment map. The key insight for establishing the model is that each feature <img src="https://tex.s2cms.ru/svg/m%5Ej%20%3D%20%5Cbegin%7Bbmatrix%7D%5Calpha%5Ej%20%26%20r%5Ej%5Cend%7Bbmatrix%7D%5ET" alt="m^j = \begin{bmatrix}\alpha^j &amp; r^j\end{bmatrix}^T" /> of the is expressed in the world frame <img src="https://tex.s2cms.ru/svg/%5C%7B%5Ctextbf%7BW%7D%5C%7D" alt="\{\textbf{W}\}" />, while features obtained by robot's sensors are expressed in robot's body frame <img src="https://tex.s2cms.ru/svg/%5C%7B%5Ctextbf%7BR%7D%5C%7D" alt="\{\textbf{R}\}" />. As a result, to predict robot measurement, all environment's features need to be transformed from <img src="https://tex.s2cms.ru/svg/%5C%7B%5Ctextbf%7BW%7D%5C%7D" alt="\{\textbf{W}\}" /> to <img src="https://tex.s2cms.ru/svg/%5C%7B%5Ctextbf%7BR%7D%5C%7D" alt="\{\textbf{R}\}" />. Such transformation formulates the measurement model and is implemented below
@@ -97,13 +100,13 @@ To calculate the Mahalanobis distance, the innovation vector <img src="https://t
 
 The covariant matrix of <img src="https://tex.s2cms.ru/svg/v_t%5E%7Bij%7D" alt="v_t^{ij}" /> is calculated by   
 
-<img src="https://tex.s2cms.ru/svg/%5CSigma_t%5E%7Bij%7D%20%3D%20R_t%5Ei%20%2B%20H_%7B%5Ctextbf%7Bx%7D%7D%20%5Ccdot%20%5Chat%7BP%7D_t%20%5Ccdot%20H_%7B%5Ctextbf%7Bx%7D%7D%5ET%20" alt="\Sigma_{IN_t}^{ij} = R_t^i + H_{\textbf{x}} \cdot \hat{P}_t \cdot H_{\textbf{x}}^T " />
+<img src="https://tex.s2cms.ru/svg/%5CSigma_%7BIN_t%7D%5E%7Bij%7D%20%3D%20R_t%5Ei%20%2B%20H_%7B%5Ctextbf%7Bx%7D%7D%20%5Ccdot%20%5Chat%7BP%7D_t%20%5Ccdot%20H_%7B%5Ctextbf%7Bx%7D%7D%5ET%20" alt="\Sigma_{IN_t}^{ij} = R_t^i + H_{\textbf{x}} \cdot \hat{P}_t \cdot H_{\textbf{x}}^T " />
 
 Here, <img src="https://tex.s2cms.ru/svg/R_t%5Ei" alt="R_t^i" /> is the covariant matrix of <img src="https://tex.s2cms.ru/svg/z_t%5Ei" alt="z_t^i" />. This matrix is inferred from the covariant associated with the noise of all 2D points that form <img src="https://tex.s2cms.ru/svg/z_t%5Ei" alt="z_t^i" />.
 
 The Mahalanobis distance <img src="https://tex.s2cms.ru/svg/d_t%5E%7Bij%7D" alt="d_t^{ij}" /> is 
 
-<img src="https://tex.s2cms.ru/svg/d_t%5E%7Bij%7D%20%3D%20v_t%5E%7Bij%7D%5ET%20%5Ccdot%20%5Cleft(%5CSigma_t%5E%7Bij%7D%5Cright)%5E%7B-1%7D%20%5Ccdot%20v_t%5E%7Bij%7D" alt="d_t^{ij} = v_t^{ij}^T \cdot \left(\Sigma_{IN_t}^{ij}\right)^{-1} \cdot v_t^{ij}" />
+<img src="https://tex.s2cms.ru/svg/d_t%5E%7Bij%7D%20%3D%20v_t%5E%7Bij%7D%5ET%20%5Ccdot%20%5Cleft(%5CSigma_%7BIN_t%7D%5E%7Bij%7D%5Cright)%5E%7B-1%7D%20%5Ccdot%20v_t%5E%7Bij%7D" alt="d_t^{ij} = v_t^{ij}^T \cdot \left(\Sigma_{IN_t}^{ij}\right)^{-1} \cdot v_t^{ij}" />
 
 If this distance is smaller than a threshold, a correspondence is found. In case there are more than 1 predicted feature match with one actual feature, the predicted feature with smallest distance is chosen.
 
@@ -132,7 +135,9 @@ The new estimation of robot pose and its covariant matrix is
 The comparison between EKF Localization and Odometry is shown below. In those figures, the grought truth and the estimated by either EKF or odometry is respectively denoted by the grey robot and the yellow robot. It can be seen that while the Odometry quickly diverse from the ground truth, EKF Localization still manages to track the true state.
 
 ![alt text][just_odometry]
+
 Fig.3 Odometry result 
 
 ![alt text][ekf_local]
+
 Fig.4 EKF Localization result
