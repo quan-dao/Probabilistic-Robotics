@@ -2,6 +2,9 @@
 [pose_graph]: ./images/pose_graph.png
 [graph_slam_components]: ./images/graph_slam_components.png
 [pose_pose_constraint]: ./images/pose_pose_constraint.png
+[pose_pose_dataset]: ./images/ls_slam_pose_pose.gif
+[intel_dataset]: ./images/ls_slam_intel_dataset.gif
+[dlr_dataset]: ./images/ls_slam_dlr_dataset.gif
 
 
 # Intro
@@ -242,4 +245,17 @@ H^{ji} += B_{ij}^T \Omega_{ij} A_{ij} &amp;&amp; H^{jj} += B_{ij}^T \Omega_{ij} 
 \end{matrix}" />
 
 ## 4. Result
-%TODO
+
+The result of applying Least-square SLAM on three datasets are shown below.
+
+![alt text][pose_pose_dataset]
+
+Fig.4 Applying LS-SLAM on simulation dataset
+
+![alt text][intel_dataset]
+
+Fig.5 Applying LS-SLAM on intel dataset
+
+![alt text][dlr_dataset]
+
+Fig.6 Applying LS-SLAM on DLR dataset

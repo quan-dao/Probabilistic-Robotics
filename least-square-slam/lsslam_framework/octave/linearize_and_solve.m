@@ -56,7 +56,7 @@ for eid = 1:length(g.edges)
     if (needToAddPrior)
       % TODO: add the prior for one pose of this edge
       % This fixes one node to remain at its current location
-      H(i, i) = H(i, i) + 1;
+      H(i : i + 2, i : i + 2) = eye(3);
       needToAddPrior = false;
     end
 
