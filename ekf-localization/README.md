@@ -132,7 +132,7 @@ The new estimation of robot pose and its covariant matrix is
 <img src="https://tex.s2cms.ru/svg/%20P_t%20%3D%20%5Cleft(I%20-%20%5Ctextbf%7BK%7D_t%20%5Ccdot%20H_t%20%5Cright)%20%5Ccdot%20%5Chat%7BP%7D_t%20" alt=" P_t = \left(I - \textbf{K}_t \cdot H_t \right) \cdot \hat{P}_t " />
 
 # 5. Result
-The comparison between EKF Localization and Odometry is shown below. In those figures, the grought truth and the estimated by either EKF or odometry is respectively denoted by the grey robot and the yellow robot. It can be seen that while the Odometry quickly diverse from the ground truth, EKF Localization still manages to track the true state.
+The comparison between EKF Localization and Odometry is shown below. In those figures, the grought truth and the estimated by either EKF or odometry is respectively denoted by the grey robot and the yellow robot. It can be seen that while the Odometry diverse from the ground truth after sometime, EKF Localization still manages to track the true state.
 
 ![alt text][just_odometry]
 
